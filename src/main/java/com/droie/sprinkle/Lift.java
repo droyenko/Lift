@@ -1,7 +1,7 @@
 package com.droie.sprinkle;
 
 public class Lift {
-    public static void theLift(final int[][] queues) {
+    public static int[] theLift(final int[][] queues) {
         for (int i = 0; i < queues.length; i++) {
             int[] queue = queues[i];
             for (int levelToGo : queue) {
@@ -23,5 +23,6 @@ public class Lift {
             }
             System.out.printf("Двигаюсь на %d этаж%n", i);
         }
+        return new int[0];
     }
 }
