@@ -1,10 +1,18 @@
 package com.droie.sprinkle;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 public class LiftTest {
+
+    private Lift lift;
+
+    @Before
+    public void setUp() {
+        lift = new Lift();
+    }
 
     @Test
     public void fromSprinkle() {
@@ -14,7 +22,7 @@ public class LiftTest {
                 new int[]{1}, // 3
                 new int[]{0}, // 4
         };
-        final int[] result = Lift.theLift(queues);
+        final int[] result = lift.theLift(queues);
         assertArrayEquals(new int[]{0,3,2,1,0}, result);
     }
 
@@ -29,7 +37,7 @@ public class LiftTest {
                 new int[0], // 6
                 new int[0], // 7
         };
-        final int[] result = Lift.theLift(queues);
+        final int[] result = lift.theLift(queues);
         assertArrayEquals(new int[]{0,2,5,0}, result);
     }
 
@@ -44,7 +52,7 @@ public class LiftTest {
                 new int[0], // 6
                 new int[0], // 7
         };
-        final int[] result = Lift.theLift(queues);
+        final int[] result = lift.theLift(queues);
         assertArrayEquals(new int[]{0,2,1,0}, result);
     }
 
@@ -59,7 +67,7 @@ public class LiftTest {
                 new int[0], // 6
                 new int[0], // 7
         };
-        final int[] result = Lift.theLift(queues);
+        final int[] result = lift.theLift(queues);
         assertArrayEquals(new int[]{0,1,2,3,4,5,0}, result);
     }
 
@@ -74,7 +82,7 @@ public class LiftTest {
                 new int[]{3}, // 6
                 new int[0], // 7
         };
-        final int[] result = Lift.theLift(queues);
+        final int[] result = lift.theLift(queues);
         assertArrayEquals(new int[]{0,5,4,3,2,1,0}, result);
     }
 }

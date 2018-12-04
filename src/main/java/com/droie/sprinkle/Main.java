@@ -20,6 +20,7 @@ public class Main {
                 new int[0], // 6
                 new int[0], // 7
         };
-        Lift.theLift(queues2);
+        Lift lift = new Lift();
+        lift.theLift(queues2);
     }
 }
