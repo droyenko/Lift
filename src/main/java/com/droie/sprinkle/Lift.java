@@ -14,29 +14,30 @@ public class Lift {
             int[] queue = queues[i];
             for (int levelToGo : queue) {
                 if (levelToGo > i) {
+                    System.out.printf("Двигаюсь на %d этаж%n", i + 1);
                     orderUp.add(i);
-                    orderUp.add(queue[levelToGo]);
                     System.out.printf("Подобрал человека на %d этаже%n", i + 1);
+                    orderUp.add(levelToGo);
                     System.out.printf("Принял команду перемещения на %d этаж%n", levelToGo + 1);
                 }
             }
-            System.out.printf("Двигаюсь на %d этаж%n", i + 2);
         }
 
         for (int i = queues.length - 1; i > 0; i--) {
             int[] queue = queues[i];
             for (int levelToGo : queue) {
                 if (levelToGo < i) {
+                    System.out.printf("Двигаюсь на %d этаж%n", i + 1);
                     orderDown.add(i);
-                    orderDown.add(queue[levelToGo]);
                     System.out.printf("Подобрал человека на %d этаже%n", i + 1);
+                    orderDown.add(levelToGo);
                     System.out.printf("Принял команду перемещения на %d этаж%n", levelToGo + 1);
                 }
             }
 
-            System.out.printf("Двигаюсь на %d этаж%n", i);
         }
         orderDown.add(0);
+        System.out.println("Двигаюсь на первый этаж");
         return Stream.concat(orderUp.stream(), orderDown.descendingSet().stream()).mapToInt(Integer::intValue).toArray();
     }
 }
