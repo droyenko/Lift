@@ -1,44 +1,73 @@
 package com.droie.sprinkle;
 
-import java.util.Arrays;
-import java.util.TreeSet;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class Lift {
-    private TreeSet<Integer> orderUp = new TreeSet<>(Arrays.asList(0));
-    private TreeSet<Integer> orderDown = new TreeSet<>();
+    private Map<Integer, LinkedList> queuesUp = new TreeMap<>();
+    private Map<Integer, LinkedList> queuesDown = new TreeMap<>(Collections.reverseOrder());
+    private List<Integer> peopleInLift = new LinkedList<>();
 
     public int[] theLift(final int[][] queues) {
-        for (int i = 0; i < queues.length; i++) {
-            int[] queue = queues[i];
-            for (int floorToGo : queue) {
-                if (floorToGo > i) {
-                    addToOrderList(orderUp, i, floorToGo);
-                }
-            }
-        }
+        initMapsWithQueues(queues);
 
-        for (int i = queues.length - 1; i > 0; i--) {
-            int[] queue = queues[i];
-            for (int floorToGo : queue) {
-                if (floorToGo < i) {
-                    addToOrderList(orderDown, i, floorToGo);
-                }
-            }
+        while (!queuesUp.isEmpty() && !queuesDown.isEmpty()) {
+            liftGoesUp();
+            liftGoesDown();
 
         }
-        orderDown.add(0);
-        System.out.println("Двигаюсь на первый этаж");
-        return Stream.concat(orderUp.stream(), orderDown.descendingSet().stream()).mapToInt(Integer::intValue).toArray();
+        return new int[0];
     }
 
-    private void addToOrderList (TreeSet<Integer> order, int floor, int floorToGo) {
-        if (order.isEmpty() || order.last() != floorToGo) {
-            order.add(floor);
-            order.add(floorToGo);
-            System.out.printf("Двигаюсь на %d этаж%n", floor + 1);
-            System.out.printf("Подобрал человека на %d этаже%n", floor + 1);
-            System.out.printf("Принял команду перемещения на %d этаж%n", floorToGo + 1);
+    private void liftGoesUp() {
+        for (Map.Entry entry : queuesUp.entrySet()){
+            processFloor(entry);
+            if (((LinkedList<Integer>) entry.getValue()).size() == 0){
+                queuesUp.remove(entry.getKey());
+            }
+        }
+    }
+
+    private void liftGoesDown() {
+        for (Map.Entry entry : queuesDown.entrySet()){
+            processFloor(entry);
+            if (((LinkedList<Integer>) entry.getValue()).size() == 0){
+                queuesDown.remove(entry.getKey());
+            }
+        }
+    }
+
+    private void processFloor(Map.Entry entry) {
+        System.out.printf("Двигаюсь на %d этаж%n", (int)entry.getKey() + 1);
+        peopleInLift.remove(entry.getKey());
+        LinkedList<Integer> floorQueue = (LinkedList<Integer>) entry.getValue();
+        int floorQueueSize = floorQueue.size();
+        for (int i = 0; i < floorQueueSize; i++) {
+            System.out.printf("Подобрал человека на %d этаже%n", (int)entry.getKey() + 1);
+            System.out.printf("Принял команду перемещения на %d этаж%n", floorQueue.peek() + 1);
+            peopleInLift.add(floorQueue.poll());
+        }
+    }
+
+    private void initMapsWithQueues(int[][] queues) {
+        for (int i = 0; i < queues.length; i++) {
+            int[] queue = queues[i];
+            if (queue.length == 0)
+                continue;
+            LinkedList<Integer> floorQueueUp = new LinkedList<>();
+            LinkedList<Integer> floorQueueDown = new LinkedList<>();
+            for (int floorToGo : queue) {
+                if (floorToGo > i) {
+                    floorQueueUp.add(floorToGo);
+                } else {
+                    floorQueueDown.add(floorToGo);
+                }
+            }
+            if (!floorQueueUp.isEmpty()){
+                queuesUp.put(i, floorQueueUp);
+            }
+            if (!floorQueueDown.isEmpty()){
+                queuesDown.put(i, floorQueueDown);
+            }
         }
     }
 }

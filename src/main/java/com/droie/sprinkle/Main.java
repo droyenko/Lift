@@ -21,6 +21,6 @@ public class Main {
                 new int[0], // 7
         };
         Lift lift = new Lift();
-        lift.theLift(queues2);
+        lift.theLift(queues1);
     }
 }
