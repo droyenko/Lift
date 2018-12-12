@@ -10,7 +10,7 @@ public class Lift {
     public int[] theLift(final int[][] queues) {
         initMapsWithQueues(queues);
 
-        while (!queuesUp.isEmpty() && !queuesDown.isEmpty()) {
+        while (!queuesUp.isEmpty() || !queuesDown.isEmpty()) {
             liftGoesUp();
             liftGoesDown();
 
@@ -19,30 +19,34 @@ public class Lift {
     }
 
     private void liftGoesUp() {
-        for (Map.Entry entry : queuesUp.entrySet()){
-            processFloor(entry);
-            if (((LinkedList<Integer>) entry.getValue()).size() == 0){
-                queuesUp.remove(entry.getKey());
+        Iterator<Map.Entry<Integer, LinkedList>> entryIt = queuesUp.entrySet().iterator();
+        while (entryIt.hasNext()){
+            Map.Entry<Integer, LinkedList> floor = entryIt.next();
+            processFloor(floor);
+            if (((LinkedList<Integer>) floor.getValue()).size() == 0){
+                entryIt.remove();
             }
         }
     }
 
     private void liftGoesDown() {
-        for (Map.Entry entry : queuesDown.entrySet()){
-            processFloor(entry);
-            if (((LinkedList<Integer>) entry.getValue()).size() == 0){
-                queuesDown.remove(entry.getKey());
+        Iterator<Map.Entry<Integer, LinkedList>> entryIt = queuesDown.entrySet().iterator();
+        while (entryIt.hasNext()){
+            Map.Entry<Integer, LinkedList> floor = entryIt.next();
+            processFloor(floor);
+            if (((LinkedList<Integer>) floor.getValue()).size() == 0){
+                entryIt.remove();
             }
         }
     }
 
-    private void processFloor(Map.Entry entry) {
-        System.out.printf("Двигаюсь на %d этаж%n", (int)entry.getKey() + 1);
-        peopleInLift.remove(entry.getKey());
-        LinkedList<Integer> floorQueue = (LinkedList<Integer>) entry.getValue();
+    private void processFloor(Map.Entry floor) {
+        System.out.printf("Двигаюсь на %d этаж%n", (int)floor.getKey() + 1);
+        peopleInLift.remove(floor.getKey());
+        LinkedList<Integer> floorQueue = (LinkedList<Integer>) floor.getValue();
         int floorQueueSize = floorQueue.size();
         for (int i = 0; i < floorQueueSize; i++) {
-            System.out.printf("Подобрал человека на %d этаже%n", (int)entry.getKey() + 1);
+            System.out.printf("Подобрал человека на %d этаже%n", (int)floor.getKey() + 1);
             System.out.printf("Принял команду перемещения на %d этаж%n", floorQueue.peek() + 1);
             peopleInLift.add(floorQueue.poll());
         }
