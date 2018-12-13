@@ -1,59 +1,72 @@
 package com.droie.sprinkle;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Lift {
     private Map<Integer, LinkedList> queuesUp = new TreeMap<>();
     private Map<Integer, LinkedList> queuesDown = new TreeMap<>(Collections.reverseOrder());
     private List<Integer> peopleInLift = new LinkedList<>();
+    private int numberOfFloors;
+    private LinkedList<Integer> orderOfStops = new LinkedList<>(Arrays.asList(0));
 
     public int[] theLift(final int[][] queues) {
         initMapsWithQueues(queues);
 
-        while (!queuesUp.isEmpty() || !queuesDown.isEmpty()) {
+        while (queuesUp.size() > 0 || queuesDown.size() > 0) {
             liftGoesUp();
             liftGoesDown();
-
         }
-        return new int[0];
+        orderOfStops.add(0);
+
+        return filterConsecutiveDuplicates(orderOfStops);
+    }
+
+    private int[] filterConsecutiveDuplicates(LinkedList<Integer> listToFilter) {
+        return IntStream.range(0, listToFilter.size())
+                .filter(i -> ((i < listToFilter.size() - 1
+                        && !listToFilter.get(i).equals(this.orderOfStops.get(i + 1))
+                        || i == listToFilter.size() - 1)))
+                .mapToObj(listToFilter::get)
+                .mapToInt(Integer::intValue).toArray();
     }
 
     private void liftGoesUp() {
-        Iterator<Map.Entry<Integer, LinkedList>> entryIt = queuesUp.entrySet().iterator();
-        while (entryIt.hasNext()){
-            Map.Entry<Integer, LinkedList> floor = entryIt.next();
-            processFloor(floor);
-            if (((LinkedList<Integer>) floor.getValue()).size() == 0){
-                entryIt.remove();
+        for (int i = 0; i < numberOfFloors; i++) {
+            if (queuesUp.containsKey(i) || peopleInLift.contains(i)){
+                processFloor(i, queuesUp.get(i));
+                queuesUp.remove(i);
+                orderOfStops.add(i);
             }
         }
     }
 
     private void liftGoesDown() {
-        Iterator<Map.Entry<Integer, LinkedList>> entryIt = queuesDown.entrySet().iterator();
-        while (entryIt.hasNext()){
-            Map.Entry<Integer, LinkedList> floor = entryIt.next();
-            processFloor(floor);
-            if (((LinkedList<Integer>) floor.getValue()).size() == 0){
-                entryIt.remove();
+        for (int i = numberOfFloors - 1; i >= 0; i--) {
+            if (queuesDown.containsKey(i) || peopleInLift.contains(i)){
+                processFloor(i, queuesDown.get(i));
+                queuesDown.remove(i);
+                orderOfStops.add(i);
             }
         }
     }
 
-    private void processFloor(Map.Entry floor) {
-        System.out.printf("Двигаюсь на %d этаж%n", (int)floor.getKey() + 1);
-        peopleInLift.remove(floor.getKey());
-        LinkedList<Integer> floorQueue = (LinkedList<Integer>) floor.getValue();
-        int floorQueueSize = floorQueue.size();
-        for (int i = 0; i < floorQueueSize; i++) {
-            System.out.printf("Подобрал человека на %d этаже%n", (int)floor.getKey() + 1);
-            System.out.printf("Принял команду перемещения на %d этаж%n", floorQueue.peek() + 1);
-            peopleInLift.add(floorQueue.poll());
+    private void processFloor(Integer floor, LinkedList floorQueue) {
+        System.out.printf("Двигаюсь на %d этаж%n", floor + 1);
+        peopleInLift.remove(floor);
+        if (floorQueue != null){
+            System.out.printf("Подобрал человека на %d этаже%n", floor + 1);
+            int floorQueueSize = floorQueue.size();
+            for (int i = 0; i < floorQueueSize; i++) {
+                System.out.printf("Принял команду перемещения на %d этаж%n", (Integer) floorQueue.peek() + 1);
+                peopleInLift.add((Integer) floorQueue.poll());
+            }
         }
     }
 
     private void initMapsWithQueues(int[][] queues) {
-        for (int i = 0; i < queues.length; i++) {
+        numberOfFloors = queues.length;
+        for (int i = 0; i < numberOfFloors; i++) {
             int[] queue = queues[i];
             if (queue.length == 0)
                 continue;
