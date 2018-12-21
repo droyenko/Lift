@@ -7,11 +7,11 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class LiftTest {
 
-    private Lift lift;
+    private InitialLift lift;
 
     @Before
     public void setUp() {
-        lift = new Lift();
+        lift = new InitialLift();
     }
 
     @Test
