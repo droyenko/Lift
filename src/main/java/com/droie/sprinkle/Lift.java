@@ -10,18 +10,20 @@ import java.util.stream.Stream;
 
 public class Lift {
     private Floor currentFloor;
+    private Floor[] buildingFloors;
     private boolean isGoingUpwards = true;
     private List<Floor> stoppedFloors;
     private int personCapacity;
     private List<Passenger> loadedPersons;
 
 
-    public Lift(Floor startingFloor, int personCapacity) {
-        this.currentFloor = startingFloor;
+    public Lift(Floor[] buildingFloors, int personCapacity) {
+        this.buildingFloors = buildingFloors;
+        this.currentFloor = buildingFloors[0];
         this.personCapacity = personCapacity;
         this.loadedPersons = new LinkedList<>();
         this.stoppedFloors = new LinkedList<>();
-        this.stoppedFloors.add(startingFloor);
+        this.stoppedFloors.add(buildingFloors[0]);
     }
 
 
@@ -31,7 +33,7 @@ public class Lift {
      */
     public void operateLift() {
         boolean hasMoved = false;
-        for (char step = 'b'; true; step++) {
+        for (int step = 1; true; step++) {
             unloadPersons();
             loadPersons();
 
@@ -67,9 +69,9 @@ public class Lift {
             if (passenger.getDestinationFloor() == currentFloor.getFloorLevel()) {
                 loadedPersons.remove(i--);
                 currentFloor.getPersonQueue().addLast(passenger);
+                System.out.printf("unloadPersons to Floor %d%n", currentFloor.getFloorLevel() + 1);
             }
         }
-        System.out.println("unloadPersons to Floor " + currentFloor + ": " + loadedPersons);
     }
 
     /**
@@ -86,8 +88,8 @@ public class Lift {
         personsEntering.forEach(person -> {
             currentFloor.getPersonQueue().remove(person);
             loadedPersons.add(person);
+            System.out.printf("loadPersons from Floor %d%n", currentFloor.getFloorLevel() + 1);
         });
-        System.out.println("loadPersons from Floor " + currentFloor + ": " + loadedPersons);
     }
 
 
@@ -141,9 +143,9 @@ public class Lift {
      * where some {@link Passenger} want to enter in any direction.
      */
     private Optional<Floor> lastFloorInDirectionWherePersonWantToEnter() {
-        return floorsInTravelDirection() //
-                .filter(floor -> floor.personsGoingToOtherFloor().findAny().isPresent()) //
-                .max(Comparator.comparingInt(this::getFloorDistance)); //
+        return floorsInTravelDirection()
+                .filter(floor -> floor.personsGoingToOtherFloor().findAny().isPresent())
+                .max(Comparator.comparingInt(this::getFloorDistance));
     }
 
 
@@ -154,7 +156,8 @@ public class Lift {
      */
     private void moveLift(Floor destinationFloor) {
         if (!currentFloor.equals(destinationFloor)) {
-            System.out.println("moveLift from Floor " + currentFloor + " to Floor " + destinationFloor);
+            System.out.printf("moveLift from Floor %d to Floor %d%n",
+                    currentFloor.getFloorLevel() + 1, destinationFloor.getFloorLevel() + 1);
             currentFloor = destinationFloor;
             stoppedFloors.add(destinationFloor);
         }
