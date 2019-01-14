@@ -34,6 +34,36 @@ public class LiftTest {
     }
 
     @Test
+    public void testUpWithVip() {
+        final int[][] queues = {
+                new int[0], // 1
+                new int[0], // 2
+                new int[]{-5,4,3}, // 3
+                new int[0], // 4
+                new int[0], // 5
+                new int[0], // 6
+                new int[0], // 7
+        };
+        final int[] result = App.theLift(queues, 10);
+        assertArrayEquals(new int[]{0,2,5,4,3,0}, result);
+    }
+
+    @Test
+    public void testVipIgnoresEveryone() {
+        final int[][] queues = {
+                new int[0], // 1
+                new int[]{-5}, // 2
+                new int[]{6}, // 3
+                new int[]{4}, // 4
+                new int[0], // 5
+                new int[0], // 6
+                new int[0], // 7
+        };
+        final int[] result = App.theLift(queues, 10);
+        assertArrayEquals(new int[]{0,1,5,2,3,4,6,0}, result);
+    }
+
+    @Test
     public void testDown() {
         final int[][] queues = {
                 new int[0], // 1
@@ -61,6 +91,21 @@ public class LiftTest {
         };
         final int[] result = App.theLift(queues, 10);
         assertArrayEquals(new int[]{0,1,2,3,4,5,0}, result);
+    }
+
+    @Test
+    public void testUpAndUpWithVip() {
+        final int[][] queues = {
+                new int[0], // 1
+                new int[]{-3}, // 2
+                new int[]{4}, // 3
+                new int[0], // 4
+                new int[]{5}, // 5
+                new int[0], // 6
+                new int[0], // 7
+        };
+        final int[] result = App.theLift(queues, 10);
+        assertArrayEquals(new int[]{0,1,3,4,5,2,4,0}, result);
     }
 
     @Test

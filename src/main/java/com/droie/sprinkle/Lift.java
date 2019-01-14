@@ -16,7 +16,6 @@ public class Lift {
     private int personCapacity;
     private List<Passenger> loadedPersons;
 
-
     public Lift(Floor[] buildingFloors, int personCapacity) {
         this.buildingFloors = buildingFloors;
         this.currentFloor = buildingFloors[0];
@@ -26,28 +25,31 @@ public class Lift {
         this.stoppedFloors.add(buildingFloors[0]);
     }
 
-
     /**
      * Operates this lift, which will transport all {@link Passenger}s to their destination {@link Floor}s
      * and return in the end back to the first {@link Floor}.
      */
     public void operateLift() {
         boolean hasMoved = false;
-        for (int step = 1; true; step++) {
+        while (true) {
             unloadPersons();
             loadPersons();
 
             Optional<Floor> nextFloor = firstFloorInTravelDirection();
+            Optional<Passenger> vipPassenger = getVipPassenger();
+
             if (!nextFloor.isPresent()) {
                 nextFloor = lastFloorInDirectionWherePersonWantToEnter();
                 reverseLiftDirection();
             }
-
-            if (nextFloor.isPresent()) {
+            if (vipPassenger.isPresent()) {
+                moveLift(buildingFloors[vipPassenger.get().getDestinationFloor()]);
+                hasMoved = true;
+            } else if (nextFloor.isPresent()) {
                 moveLift(nextFloor.get());
                 hasMoved = true;
             } else if (!hasMoved) {
-                // 5. repeat 1 - 4 till this lift hasn't moved any more (no more persons want to ride)
+                // repeat till this lift hasn't moved any more (no more persons want to ride)
                 break;
             } else {
                 hasMoved = false;
@@ -58,9 +60,8 @@ public class Lift {
         System.out.println("finish with stoppedFloors: " + stoppedFloors);
     }
 
-
     /**
-     * 1. unloads all {@link Passenger}s from the {@link Lift#loadedPersons},
+     * Unloads all {@link Passenger}s from the {@link Lift#loadedPersons},
      * which have as destination the {@link #currentFloor}.
      */
     private void unloadPersons() {
@@ -69,13 +70,13 @@ public class Lift {
             if (passenger.getDestinationFloor() == currentFloor.getFloorLevel()) {
                 loadedPersons.remove(i--);
                 currentFloor.getPersonQueue().addLast(passenger);
-                System.out.printf("unloadPersons to Floor %d%n", currentFloor.getFloorLevel() + 1);
+                System.out.printf("Unload person to Floor %d%n", currentFloor.getFloorLevel() + 1);
             }
         }
     }
 
     /**
-     * 2. loads all {@link Passenger}s from {@link #currentFloor}, which want to ride in lifts direction.
+     * Loads all {@link Passenger}s from {@link #currentFloor}, which want to ride in lifts direction.
      * Following {@link Floor#personQueue} in order and given {@link #personCapacity}.
      */
     private void loadPersons() {
@@ -88,13 +89,12 @@ public class Lift {
         personsEntering.forEach(person -> {
             currentFloor.getPersonQueue().remove(person);
             loadedPersons.add(person);
-            System.out.printf("loadPersons from Floor %d%n", currentFloor.getFloorLevel() + 1);
+            System.out.printf("Load person from floor %d%n", currentFloor.getFloorLevel() + 1);
         });
     }
 
-
     /**
-     * @return 3.1 {@link Optional} first (nearest) {@link Floor} in lift travel direction,
+     * @return {@link Optional} first (nearest) {@link Floor} in lift travel direction,
      * where some {@link Passenger} want to enter OR exit.
      */
     private Optional<Floor> firstFloorInTravelDirection() {
@@ -107,7 +107,7 @@ public class Lift {
     }
 
     /**
-     * @return 3.1 a) {@link Optional} first (nearest) {@link Floor} in lift travel direction,
+     * @return {@link Optional} first (nearest) {@link Floor} in lift travel direction,
      * where some {@link Passenger} wants to enter.
      */
     private Optional<Floor> firstFloorInDirectionWherePersonWantToEnter() {
@@ -122,9 +122,8 @@ public class Lift {
         }
     }
 
-
     /**
-     * @return 3.1 b) {@link Optional} first (nearest) {@link Floor}, where some {@link #loadedPersons} wants
+     * @return {@link Optional} first (nearest) {@link Floor}, where some {@link #loadedPersons} wants
      * to exit in lift travel direction
      */
     private Optional<Floor> firstFloorInDirectionWherePersonWantToExit() {
@@ -137,9 +136,8 @@ public class Lift {
                 .anyMatch(personDesinationFloorLevel -> floor.getFloorLevel() == personDesinationFloorLevel);
     }
 
-
     /**
-     * @return 3.2 {@link Optional} last (fares) {@link Floor} in lift travel direction,
+     * @return {@link Optional} last (fares) {@link Floor} in lift travel direction,
      * where some {@link Passenger} want to enter in any direction.
      */
     private Optional<Floor> lastFloorInDirectionWherePersonWantToEnter() {
@@ -148,15 +146,14 @@ public class Lift {
                 .max(Comparator.comparingInt(this::getFloorDistance));
     }
 
-
     /**
-     * 4. moves the {@link Lift} to given destinationFloor and add it to {@link #stoppedFloors}
+     * Moves the {@link Lift} to given destinationFloor and add it to {@link #stoppedFloors}
      *
      * @param destinationFloor next Floor, where this lift moves to and stops
      */
     private void moveLift(Floor destinationFloor) {
         if (!currentFloor.equals(destinationFloor)) {
-            System.out.printf("moveLift from Floor %d to Floor %d%n",
+            System.out.printf("Move lift from Floor %d to Floor %d%n",
                     currentFloor.getFloorLevel() + 1, destinationFloor.getFloorLevel() + 1);
             currentFloor = destinationFloor;
             stoppedFloors.add(destinationFloor);
@@ -183,6 +180,13 @@ public class Lift {
             return IntStream.rangeClosed(1, currentFloor.getFloorLevel())
                     .mapToObj(floorLevel -> buildingFloors[currentFloor.getFloorLevel() - floorLevel]);
         }
+    }
+
+    /**
+     * @return {@link Optional} VIP {@link Passenger} from the {@link Lift#loadedPersons}
+     */
+    private Optional<Passenger> getVipPassenger() {
+        return loadedPersons.stream().filter(Passenger::isVip).findFirst();
     }
 
     private int getFloorDistance(Floor floor) {

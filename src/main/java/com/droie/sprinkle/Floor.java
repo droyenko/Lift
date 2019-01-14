@@ -13,10 +13,6 @@ public class Floor {
         this.personQueue = personQueue;
     }
 
-    public Stream<Passenger> personsAtDesinationFloor() {
-        return personQueue.stream().filter(passenger -> floorLevel == passenger.getDestinationFloor());
-    }
-
     public Stream<Passenger> personsGoingToOtherFloor() {
         return personQueue.stream().filter(passenger -> floorLevel != passenger.getDestinationFloor());
     }

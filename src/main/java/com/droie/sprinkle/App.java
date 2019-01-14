@@ -6,11 +6,10 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 public class App {
-    private Floor[] buildingFloors;
     private Lift lift;
 
-    public App(Floor[] buildingFloors, int passengerCapacity) {
-        this.buildingFloors = buildingFloors;
+    public App(int[][] queues, int passengerCapacity) {
+        Floor[] buildingFloors = createFloorsWithPersonQueues(queues);
         this.lift = new Lift(buildingFloors, passengerCapacity);
     }
 
@@ -18,8 +17,7 @@ public class App {
         if (queues == null || queues.length == 0) {
             return new int[0];
         }
-        Floor[] buildingFloors = createFloorsWithPersonQueues(queues);
-        App app = new App(buildingFloors, personCapacity);
+        App app = new App(queues, personCapacity);
         app.lift.operateLift();
         return app.lift.getStoppedFloors().stream().mapToInt(Floor::getFloorLevel).toArray();
     }
